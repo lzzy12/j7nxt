@@ -37,8 +37,8 @@ static void simulate_DFREE(char *arg);
 static void simulate_DREF(char *arg);
 static void simulate_MCRPT(char *arg);
 static void simulate_LOMEM(char *arg);
-static void simulate_SOFT_LOCKUP(char *arg);
-static void simulate_HARD_LOCKUP(char *arg);
+//static void simulate_SOFT_LOCKUP(char *arg);
+//static void simulate_HARD_LOCKUP(char *arg);
 static void simulate_SPIN_LOCKUP(char *arg);
 static void simulate_PC_ABORT(char *arg);
 static void simulate_SP_ABORT(char *arg);
@@ -101,8 +101,8 @@ struct force_error force_error_vector = {
 		{"danglingref",	&simulate_DREF},
 		{"memcorrupt",	&simulate_MCRPT},
 		{"lowmem",	&simulate_LOMEM},
-		{"softlockup",	&simulate_SOFT_LOCKUP},
-		{"hardlockup",	&simulate_HARD_LOCKUP},
+//		{"softlockup",	&simulate_SOFT_LOCKUP},
+//		{"hardlockup",	&simulate_HARD_LOCKUP},
 		{"spinlockup",	&simulate_SPIN_LOCKUP},
 		{"pcabort",	&simulate_PC_ABORT},
 		{"spabort",	&simulate_SP_ABORT},
@@ -273,6 +273,7 @@ static void simulate_LOMEM(char *arg)
 	pr_crit("Allocated %d KB!\n", i * 128);
 }
 
+#ifdef CONFIG_BOOTPARAM_SOFTLOCKUP_PANIC
 static void simulate_SOFT_LOCKUP(char *arg)
 {
 	pr_crit("%s()\n", __func__);
@@ -281,7 +282,9 @@ static void simulate_SOFT_LOCKUP(char *arg)
 	asm("b .");
 	preempt_enable();
 }
-
+#endif
+ 
+#ifdef CONFIG_BOOTPARAM_HARDLOCKUP_PANIC
 static void simulate_HARD_LOCKUP_handler(void *info)
 {
 	asm("b .");
@@ -304,6 +307,7 @@ static void simulate_HARD_LOCKUP(char *arg)
 		}
 	}
 }
+#endif
 
 static void simulate_SPIN_LOCKUP(char *arg)
 {
