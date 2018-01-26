@@ -102,6 +102,7 @@ config SEC_BOOTSTAT
 	default y
 
 config SEC_INITCALL_DEBUG
+	bool "Enable Samsung initcall debug support"
 	default n
 	depends on SEC_EXT && !SAMSUNG_PRODUCT_SHIP
 	help
