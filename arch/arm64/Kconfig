@@ -234,6 +234,9 @@ config DTB_ON7XELTE
 config DTB_J7VELTE
 	bool "Builds DTB for J7 Nxt"
 
+config DTB_J7XELTE
+	bool "Builds DTB for J7 16"
+
 config ARCH_EXYNOS7
 	bool "SAMSUNG EXYNOS7"
 	select HAVE_ARM_SCU if SMP
