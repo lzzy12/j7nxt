@@ -3,5 +3,5 @@
 #
 
 # source "fs/sdcardfs/$ANDROID_MAJOR_VERSION/Kconfig"
-source "fs/sdcardfs/n/Kconfig"
+source "fs/sdcardfs/o/Kconfig"
 
