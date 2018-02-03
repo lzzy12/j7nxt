@@ -19,6 +19,14 @@ struct wake_lock mms_wake_lock;
 extern int tui_force_close(uint32_t arg);
 struct mms_ts_info *tui_tsp_info;
 #endif
+
+#ifdef CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE
+#include <linux/input/doubletap2wake.h>
+#else
+#define dt2w_switch 0
+#endif
+#define FTS_I2C_RETRY 10
+
 /**
  * Reboot chip
  *
@@ -75,8 +83,9 @@ int mms_i2c_read(struct mms_ts_info *info, char *write_buf, unsigned int write_l
 
 	while (retry--) {
 		res = i2c_transfer(info->client->adapter, msg, ARRAY_SIZE(msg));
-
-		if (res == ARRAY_SIZE(msg)) {
+		if (res == 2) {
+			goto ERROR_REBOOT;
+		} else if (res == ARRAY_SIZE(msg)) {
 			goto DONE;
 		} else if (res < 0) {
 			tsp_debug_err(true, &info->client->dev,
@@ -125,7 +134,6 @@ int mms_i2c_read_next(struct mms_ts_info *info, char *read_buf, int start_idx,
 
 	while (retry--) {
 		res = i2c_master_recv(info->client, rbuf, read_len);
-
 		if (res == read_len) {
 			goto DONE;
 		} else if (res < 0) {
@@ -174,8 +182,9 @@ int mms_i2c_write(struct mms_ts_info *info, char *write_buf, unsigned int write_
 
 	while (retry--) {
 		res = i2c_master_send(info->client, write_buf, write_len);
-
-		if (res == write_len) {
+		if (res == 1) {
+			goto ERROR_REBOOT;
+		} else if (res == write_len) {
 			goto DONE;
 		} else if (res < 0) {
 			tsp_debug_err(true, &info->client->dev,

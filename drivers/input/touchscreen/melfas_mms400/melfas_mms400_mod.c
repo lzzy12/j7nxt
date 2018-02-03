@@ -154,6 +154,10 @@ void mms_input_event_handler(struct mms_ts_info *info, u8 sz, u8 *buf)
 
 		// Report input data
 #if MMS_USE_TOUCHKEY
+		if (dt2w_switch) {
+				input_sync(info->input_dev);
+				break;
+			}
 		if ((tmp[0] & MIP_EVENT_INPUT_SCREEN) == 0) {
 			//Touchkey Event
 			int key = tmp[0] & 0xf;
@@ -446,7 +450,7 @@ int mms_lowpower_mode(struct mms_ts_info *info, int on)
 
 	msleep(20);
 
-	if (mms_i2c_read(info, wbuf, 2, rbuf, 1)) {
+	if (!dt2w_switch && mms_i2c_read(info, wbuf, 2, rbuf, 1)) {
 		input_err(true, &info->client->dev, "%s [ERROR] read %x %x, rbuf %x\n",
 				__func__, wbuf[0], wbuf[1], rbuf[0]);
 		return -EIO;
@@ -461,7 +465,7 @@ int mms_lowpower_mode(struct mms_ts_info *info, int on)
 	// set AOD or SPAY bit
 	wbuf[0] = MIP_R0_AOT;
 	wbuf[1] = MIP_R0_AOT_CTRL;
-	if (mms_i2c_read(info, wbuf, 2, rbuf, 1)) {
+	if (!dt2w_switch && mms_i2c_read(info, wbuf, 2, rbuf, 1)) {
 		input_err(true, &info->client->dev, "%s [ERROR] read %x %x, rbuf %x\n",
 				__func__, wbuf[0], wbuf[1], rbuf[0]);
 		return -EIO;
@@ -482,7 +486,7 @@ int mms_lowpower_mode(struct mms_ts_info *info, int on)
 
 	msleep(20);
 
-	if (mms_i2c_read(info, wbuf, 2, rbuf, 1)) {
+	if (!dt2w_switch && mms_i2c_read(info, wbuf, 2, rbuf, 1)) {
 		input_err(true, &info->client->dev, "%s [ERROR] read %x %x, rbuf %x\n",
 				__func__, wbuf[0], wbuf[1], rbuf[0]);
 		return -EIO;

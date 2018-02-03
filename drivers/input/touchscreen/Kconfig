@@ -735,6 +735,23 @@ config TOUCHSCREEN_MC13783
 	  To compile this driver as a module, choose M here: the
 	  module will be called mc13783_ts.
 
+config TOUCHSCREEN_SWEEP2WAKE
+ 	tristate "Sweep2Wake for touchscreens"
+ 	select TOUCHSCREEN_PREVENT_SLEEP
+ 	default n
+ 
+ config TOUCHSCREEN_DOUBLETAP2WAKE
+ 	tristate "DoubleTap2Wake for touchscreens"
+ 	select TOUCHSCREEN_PREVENT_SLEEP
+ 	default n
+ 
+ config TOUCHSCREEN_PREVENT_SLEEP
+ 	bool "Inihibit sleep on modified touchscreen drivers"
+ 	default n
+ 	help
+ 	  This disables the sleep function of modified touchscreen drivers.
+
+
 config TOUCHSCREEN_USB_EGALAX
 	default y
 	bool "eGalax, eTurboTouch CT-410/510/700 device support" if EXPERT

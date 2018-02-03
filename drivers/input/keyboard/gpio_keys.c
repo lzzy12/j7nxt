@@ -10,7 +10,7 @@
  */
 
 #include <linux/module.h>
-
+#include <linux/powersuspend.h>
 #include <linux/init.h>
 #include <linux/fs.h>
 #include <linux/interrupt.h>
@@ -24,6 +24,7 @@
 #include <linux/platform_device.h>
 #include <linux/input.h>
 #include <linux/gpio_keys.h>
+#include <linux/wakelock.h>
 #include <linux/workqueue.h>
 #include <linux/gpio.h>
 #include <linux/of.h>
@@ -34,6 +35,24 @@
 
 #include <linux/sec_sysfs.h>
 #include <linux/sec_debug.h>
+
+static void sync_system(struct work_struct *work);
+static DECLARE_WORK(sync_system_work, sync_system);
+struct wake_lock sync_wake_lock;
+
+static bool suspended = false;
+
+static void sync_system(struct work_struct *work)
+{
+	if (suspended)
+		msleep(5000);
+
+	pr_info("%s +\n", __func__);
+	wake_lock(&sync_wake_lock);
+	emergency_sync();
+	wake_unlock(&sync_wake_lock);
+	pr_info("%s -\n", __func__);
+}
 
 struct device *sec_key;
 EXPORT_SYMBOL(sec_key);
@@ -448,6 +467,12 @@ static void gpio_keys_gpio_report_event(struct gpio_button_data *bdata)
 	int state = (gpio_get_value_cansleep(button->gpio) ? 1 : 0) ^ button->active_low;
 	struct irq_desc *desc = irq_to_desc(gpio_to_irq(button->gpio));
 
+if (button->code == KEY_POWER) {
+		schedule_work(&sync_system_work);
+		if (!!state) {
+			printk(KERN_INFO "PWR key is %s\n", state ? "pressed" : "released");
+		}
+	}	
 	if (!desc) {
 		pr_err("%s: irq_desc is null!! (gpio=%d)\n", __func__, button->gpio);
 		return;
@@ -487,6 +512,22 @@ static void gpio_keys_gpio_report_event(struct gpio_button_data *bdata)
 	}
 	input_sync(input);
 }
+
+static void gpio_keys_early_suspend(struct power_suspend *handler)
+ {
+ 	suspended = true;
+ 	return;
+ }
+ static void gpio_keys_late_resume(struct power_suspend *handler)
+ {
+ 	suspended = false;
+ 	return;
+ }
+
+static struct power_suspend gpio_suspend = {
+	.suspend = gpio_keys_early_suspend,
+	.resume = gpio_keys_late_resume,
+};
 
 static void gpio_keys_gpio_work_func(struct work_struct *work)
 {
@@ -1043,6 +1084,9 @@ static struct platform_driver gpio_keys_device_driver = {
 static int __init gpio_keys_init(void)
 {
 	return platform_driver_register(&gpio_keys_device_driver);
+	register_power_suspend(&gpio_suspend);
+	wake_lock_init(&sync_wake_lock, WAKE_LOCK_SUSPEND,
+		"sync_wake_lock");
 }
 
 static void __exit gpio_keys_exit(void)
