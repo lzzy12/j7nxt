@@ -22,7 +22,7 @@
         model_info-platform = "android";
         model_info-subtype = "samsung";
         model_info-hw_rev = <0>;
-        model_info-hw_rev_end = <1>;
+        model_info-hw_rev_end = <0>;
 	compatible = "samsung, Galaxy Tab Active2 WIFI 00", "samsung,exynos7870";
 
 	cnss_dcdc_en: cnss_dcdc_en {
@@ -38,6 +38,20 @@
 	};
 
 	pinctrl@139F0000 {
+		grip_int: grip_int {
+			samsung,pins = "gpa2-4";
+			samsung,pin-function = <0xF>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+
+		grip_sub_int: grip_sub_int {
+			samsung,pins = "gpa1-2";
+			samsung,pin-function = <0xF>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+
 		grip_wifi_int: grip_wifi_int {
 			samsung,pins = "gpa2-3";
 			samsung,pin-function = <0xF>;
@@ -51,17 +65,54 @@
 			samsung,pin-pud = <0>;
 			samsung,pin-drv = <0>;
 		};
-		/delete-node/ bt-btwake;
 	};
 
-	i2c@13860000 {
-		samsung,i2c-sda-delay = <100>;
-		samsung,i2c-max-bus-freq = <400000>;
-		status = "okay";
+	i2c@23 {
+		compatible = "i2c-gpio";
+		gpios = <&gpc9 0 0 /* sda */
+			&gpc9 1 0 /* scl */>;
+		i2c-gpio,delay-us = <2>;
 		#address-cells = <1>;
 		#size-cells = <0>;
+		status = "okay";
 		pinctrl-names = "default";
 		pinctrl-0 = <&grip_i2c>;
+		
+		sx9306-i2c@28 {
+			compatible = "sx9306-i2c";
+			reg = <0x28>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&grip_int>;
+			interrupt-parent = <&gpa2>;
+			interrupts = <4 0 0>;
+			sx9306-i2c,nirq-gpio = <&gpa2 4 0>;
+			#sx9306-i2c,ctrl0 = <0x14>; /* Scanperiod : 60 */
+			sx9306-i2c,ctrl2 = <0x6f>; /* Gain: 8, Freq : 125, Resolution : Finest */
+			sx9306-i2c,ctrl3 = <0x02>; /* Rawfilter: Medium */
+			#sx9306-i2c,ctrl5 = <0x0f>; /* AVGNEG:001 AVGPOS : 111 */
+			sx9306-i2c,normal-thd = <5>; /* normal touch threshold */
+			sx9306-i2c,ch-main = <2>; /* channel number */
+			sx9306-i2c,ch-sub1 = <0xff>; /*oxff: Not be used sub channel */
+			#sx9306-i2c,ta-thd = <0x0f>; /* TA threhold : 300 */
+		};
+
+		sx9306_sub-i2c@29{
+			compatible = "sx9306_sub-i2c";
+			reg = <0x29>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&grip_sub_int>;
+			interrupt-parent = <&gpa1>;
+			interrupts = <2 0 0>;
+			sx9306_sub-i2c,nirq-gpio = <&gpa1 2 0>;
+			#sx9306_sub-i2c,ctrl0 = <0x04>; /* Scanperiod : 30 */
+			sx9306_sub-i2c,ctrl2 = <0x6f>; /* Gain:8, Freq : 125, Resolution : Finest */
+			sx9306_sub-i2c,ctrl3 = <0x02>; /* Rawfilter: Medium */
+			#sx9306_sub-i2c,ctrl5 = <0x0f>; /* AVGNEG:001 AVGPOS : 111 */
+			sx9306_sub-i2c,normal-thd = <5>; /* normal touch threshold */
+			sx9306_sub-i2c,ch-main = <2>; /* channel number */
+			sx9306_sub-i2c,ch-sub1 = <0xff>; /*oxff: Not be used sub channel */
+			#sx9306_sub-i2c,ta-thd = <0x0f>; /* TA threhold : 300 */
+		};
 		
 		sx9306_wifi-i2c@2a{
 			compatible = "sx9306_wifi-i2c";
@@ -72,13 +123,13 @@
 			interrupts = <3 0 0>;
 			sx9306_wifi-i2c,nirq-gpio = <&gpa2 3 0>;
 			#sx9306_wifi-i2c,ctrl0 = <0x04>; /* Scanperiod : 30 */
-			sx9306_wifi-i2c,ctrl2 = <0x77>; /* Gain:8, Freq : 167, Resolution : Finest */
-			sx9306_wifi-i2c,ctrl3 = <0x03>; /* Rawfilter: High */
+			#sx9306_wifi-i2c,ctrl2 = <0x47>; /* Gain:4, Freq : 167, Resolution : Finest */
+			#sx9306_wifi-i2c,ctrl3 = <0x02>; /* Rawfilter: Medium */
 			#sx9306_wifi-i2c,ctrl5 = <0x0f>; /* AVGNEG:001 AVGPOS : 111 */
-			sx9306_wifi-i2c,normal-thd = <4>; /* normal touch threshold */
+			sx9306_wifi-i2c,normal-thd = <5>; /* normal touch threshold */
 			sx9306_wifi-i2c,ch-main = <2>; /* channel number */
 			sx9306_wifi-i2c,ch-sub1 = <0xff>; /*oxff: Not be used sub channel */
-			sx9306_wifi-i2c,ta-thd = <0x0f>; /* TA threhold : 300 */
+			#sx9306_wifi-i2c,ta-thd = <0x0f>; /* TA threhold : 300 */
 		};
 	};
 	
@@ -113,7 +164,7 @@
 			compatible = "taos,tmd3725";
 			reg = <0x39>;
 			pinctrl-names = "default";
-			pinctrl-0 = <&prox_int &proxy_led_en>;
+			pinctrl-0 = <&prox_int>;
 			interrupt-parent = <&gpa1>;
 			interrupts = <4 0 0>;
 			taos,irq_gpio = <&gpa1 4 0x00>;
@@ -421,14 +472,12 @@
 			io-channel-names = "adc-ear","adc-gdet";
 			#io-channel-cells = <2>;
 			io-channel-ranges;
-			but-zones-list = <&but_zones 226 0 206>, /* send/end */
-					<&but_zones 582 207 290>, /* google */
-					<&but_zones 115 291 492>, /* vol up */
-					<&but_zones 114 493 1300>; /* vol down */
-			mic-adc-range = <1367>;
+			but-zones-list = <&but_zones 226 0 240>, /* send/end */
+					<&but_zones 582 241 317>, /* google */
+					<&but_zones 115 318 517>, /* vol up */
+					<&but_zones 114 518 1107>; /* vol down */
+			mic-adc-range = <1347>;
 			mic-det-delay = <550>;
-			water-threshold-max = <2250>;
-			water-threshold-min1 = <550>;
 		};
 	};
 
@@ -493,11 +542,11 @@
 	s1402x: s1402x@14880000 {
 		pinctrl-names = "default", "idle", "bt", "bt-idle";
 		pinctrl-0 = <&i2s_pmic_amp_bus
-			&i2s_amp_bus>;
+			&i2s_bt_bus>;
 		pinctrl-1 = <&i2s_pmic_amp_bus_idle
 			&i2s_bt_bus_idle> ;
 		pinctrl-2 = <&i2s_pmic_bus
-			&i2s_bt_bus>;
+			&i2s_amp_bus>;
 		pinctrl-3 = <&i2s_bt_bus_idle>;
 
 		/delete-property/ bck-mcko-mode;
@@ -519,64 +568,47 @@
 
 		grip_i2c: grip_i2c {
 			samsung,pins = "gpc9-1", "gpc9-0";
-			samsung,pin-function = <2>;
+			samsung,pin-function = <3>;
 			samsung,pin-pud = <0>;
 		};
-		bt_en: bt-en {
-			samsung,pins ="gpd4-0";
-			samsung,pin-function = <1>;
-			samsung,pin-pud = <0>;
-			samsung,pin-con-pdn = <3>;
-			samsung,pin-pud-pdn = <0>;
-		};
+
 		acc_int: acc_int {
 			samsung,pins = "gpd4-3";
 			samsung,pin-function = <0xF>;
 			samsung,pin-pud = <0>;
 			samsung,pin-drv = <0>;
 		};
-		bt_btwake: bt-btwake {
-			samsung,pins = "gpd4-5";
-			samsung,pin-function = <1>;
-			samsung,pin-pud = <1>;
-			samsung,pin-pud-pdn = <0>;
-		};
+
 		sensor_ldo_en: sensor_ldo_en {
 			samsung,pins = "gpf4-2";
 			samsung,pin-function = <1>;
 			samsung,pin-pud = <0>;
 			samsung,pin-val = <1>;
 		};
-
-		proxy_led_en: proxy_led_en {
-			samsung,pins = "gpd3-3";
-			samsung,pin-function = <1>;
-			samsung,pin-pud = <0>;
-		};
 	};
-
+	
 	pinctrl@139B0000 {
 		uart1_rts: uart1-rts {
 			samsung,pins = "gpd2-3";
 			samsung,pin-function = <2>;
-			samsung,pin-pud = <1>;
-			samsung,pin-con-pdn = <3>;
-			samsung,pin-pud-pdn = <1>;
+			samsung,pin-pud = <3>;
+			samsung,pin-con-pdn = <1>;
+			samsung,pin-pud-pdn = <3>;
 		};
 
 		uart1_cts: uart1-cts {
 			samsung,pins = "gpd2-2";
 			samsung,pin-function = <2>;
-			samsung,pin-pud = <1>;
-			samsung,pin-con-pdn = <3>;
-			samsung,pin-pud-pdn = <1>;
+			samsung,pin-pud = <3>;
+			samsung,pin-con-pdn = <2>;
+			samsung,pin-pud-pdn = <3>;
 		};
 
 		uart1_tx: uart1-tx {
 			samsung,pins = "gpd2-1";
 			samsung,pin-function = <2>;
 			samsung,pin-pud = <3>;
-			samsung,pin-con-pdn = <3>;
+			samsung,pin-con-pdn = <1>;
 			samsung,pin-pud-pdn = <3>;
 		};
 
@@ -584,15 +616,18 @@
 			samsung,pins = "gpd2-0";
 			samsung,pin-function = <2>;
 			samsung,pin-pud = <3>;
-			samsung,pin-con-pdn = <3>;
+			samsung,pin-con-pdn = <2>;
 			samsung,pin-pud-pdn = <3>;
 		};
 	};
 	
 	serial_1: uart@13800000 {
 		status = "okay";
-		pinctrl-names = "default";
-		pinctrl-0 = <&uart1_rts &uart1_cts &uart1_tx &uart1_rx>;
+	};
+	
+	serial@13800000 {
+	    pinctrl-names = "default";
+		pinctrl-6 = <&uart1_rts &uart1_cts &uart1_tx &uart1_rx>;
 	};
 
 	gps {
@@ -600,10 +635,6 @@
 		gpios = <&gpc6 1 0x1 >; /* GPS_PWR_ON */
 		status = "okay";
 	};
-
-	i2c@13840000 {
-		touchscreen@49 {
-			stm,bringup = <2>;
-		};
-	};
+	
+	
 };

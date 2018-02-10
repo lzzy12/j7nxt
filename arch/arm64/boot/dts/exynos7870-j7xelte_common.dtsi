@@ -9,8 +9,8 @@
  * published by the Free Software Foundation.
 */
 
-#include "exynos7870-rmem-2000MB.dtsi"
 #include "exynos7870.dtsi"
+#include "exynos7870-rmem-2000MB.dtsi"
 
 / {
 	model = "Samsung J7XELTE board based on Exynos7870";
@@ -92,10 +92,16 @@
 	};
 
 	s1402x: s1402x@14880000 {
-		pinctrl-names = "default", "idle";
+		pinctrl-names = "default", "idle", "bt", "bt-idle","fm", "fm-idle";
 		pinctrl-0 = <&i2s_pmic_bus
 				&i2s_bt_bus>;
 		pinctrl-1 = <&i2s_pmic_bus_idle
+				&i2s_bt_bus_idle>;
+		pinctrl-2 = <&i2s_bt_bus>;
+		pinctrl-3 = <&i2s_bt_bus_idle>;
+		pinctrl-4 = <&i2s_pmic_bus
+				&i2s_bt_bus>;
+		pinctrl-5 = <&i2s_pmic_bus_idle
 				&i2s_bt_bus_idle>;
 		bt-fm-combo;
 		bck-mcko-mode;
