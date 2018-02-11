@@ -116,26 +116,6 @@ struct force_error force_error_vector = {
 
 static DEFINE_SPINLOCK(sec_debug_test_lock);
 
-static int str_to_num(char *s)
-{
-	if (s) {
-		switch (s[0]) {
-		case '0':
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-			return (s[0]-'0');
-
-		default:
-			return -1;
-		}
-	}
-	return -1;
-}
 
 /* timeout for dog bark/bite */
 #define DELAY_TIME 30000
@@ -272,42 +252,6 @@ static void simulate_LOMEM(char *arg)
 		i++;
 	pr_crit("Allocated %d KB!\n", i * 128);
 }
-
-#ifdef CONFIG_BOOTPARAM_SOFTLOCKUP_PANIC
-static void simulate_SOFT_LOCKUP(char *arg)
-{
-	pr_crit("%s()\n", __func__);
-	softlockup_panic = 1;
-	preempt_disable();
-	asm("b .");
-	preempt_enable();
-}
-#endif
- 
-#ifdef CONFIG_BOOTPARAM_HARDLOCKUP_PANIC
-static void simulate_HARD_LOCKUP_handler(void *info)
-{
-	asm("b .");
-}
-
-static void simulate_HARD_LOCKUP(char *arg)
-{
-	int cpu;
-
-	pr_crit("%s()\n", __func__);
-
-	if (arg) {
-		cpu = str_to_num(arg);
-		smp_call_function_single(cpu, simulate_HARD_LOCKUP_handler, 0, 0);
-	} else {
-		for_each_online_cpu(cpu) {
-			if (cpu == smp_processor_id())
-				continue;
-			smp_call_function_single(cpu, simulate_HARD_LOCKUP_handler, 0, 0);
-		}
-	}
-}
-#endif
 
 static void simulate_SPIN_LOCKUP(char *arg)
 {
