@@ -81,9 +81,8 @@
 
 /* 0x139C_0000(NFC): gpc2 */
 &pinctrl_5 {
-	pinctrl-names = "default","sleep";
+	pinctrl-names = "default";
 	pinctrl-0 = <&initial5>;
-	pinctrl-1 = <&sleep5>;
 	initial5: initial-state {
 		PIN_OUT_SET_PULL(gpc2-2, 0, LV1, DOWN);	/* IRIS_LED_TZ */
 	};

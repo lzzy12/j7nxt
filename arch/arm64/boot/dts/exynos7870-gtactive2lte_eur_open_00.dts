@@ -22,7 +22,7 @@
         model_info-platform = "android";
         model_info-subtype = "samsung";
         model_info-hw_rev = <0>;
-        model_info-hw_rev_end = <0>;
+        model_info-hw_rev_end = <1>;
 	compatible = "samsung, Galaxy Tab Active2 LTE 00", "samsung,exynos7870";
 
 	cnss_dcdc_en: cnss_dcdc_en {
@@ -65,6 +65,7 @@
 			samsung,pin-pud = <0>;
 			samsung,pin-drv = <0>;
 		};
+		/delete-node/ bt-btwake;
 	};
 
 	i2c@13860000 {
@@ -85,13 +86,13 @@
 			interrupts = <4 0 0>;
 			sx9306-i2c,nirq-gpio = <&gpa2 4 0>;
 			#sx9306-i2c,ctrl0 = <0x14>; /* Scanperiod : 60 */
-			sx9306-i2c,ctrl2 = <0x6f>; /* Gain: 8, Freq : 125, Resolution : Finest */
-			sx9306-i2c,ctrl3 = <0x02>; /* Rawfilter: Medium */
+			sx9306-i2c,ctrl2 = <0x77>; /* Gain: 8, Freq : 167, Resolution : Finest */
+			sx9306-i2c,ctrl3 = <0x03>; /* Rawfilter: High */
 			#sx9306-i2c,ctrl5 = <0x0f>; /* AVGNEG:001 AVGPOS : 111 */
 			sx9306-i2c,normal-thd = <5>; /* normal touch threshold */
 			sx9306-i2c,ch-main = <2>; /* channel number */
 			sx9306-i2c,ch-sub1 = <0xff>; /*oxff: Not be used sub channel */
-			#sx9306-i2c,ta-thd = <0x0f>; /* TA threhold : 300 */
+			sx9306-i2c,ta-thd = <0x0f>; /* TA threhold : 300 */
 		};
 
 		sx9306_sub-i2c@29{
@@ -121,13 +122,13 @@
 			interrupts = <3 0 0>;
 			sx9306_wifi-i2c,nirq-gpio = <&gpa2 3 0>;
 			#sx9306_wifi-i2c,ctrl0 = <0x04>; /* Scanperiod : 30 */
-			#sx9306_wifi-i2c,ctrl2 = <0x47>; /* Gain:4, Freq : 167, Resolution : Finest */
-			#sx9306_wifi-i2c,ctrl3 = <0x02>; /* Rawfilter: Medium */
+			sx9306_wifi-i2c,ctrl2 = <0x77>; /* Gain:8, Freq : 167, Resolution : Finest */
+			sx9306_wifi-i2c,ctrl3 = <0x03>; /* Rawfilter: High */
 			#sx9306_wifi-i2c,ctrl5 = <0x0f>; /* AVGNEG:001 AVGPOS : 111 */
-			sx9306_wifi-i2c,normal-thd = <5>; /* normal touch threshold */
+			sx9306_wifi-i2c,normal-thd = <4>; /* normal touch threshold */
 			sx9306_wifi-i2c,ch-main = <2>; /* channel number */
 			sx9306_wifi-i2c,ch-sub1 = <0xff>; /*oxff: Not be used sub channel */
-			#sx9306_wifi-i2c,ta-thd = <0x0f>; /* TA threhold : 300 */
+			sx9306_wifi-i2c,ta-thd = <0x0f>; /* TA threhold : 300 */
 		};
 	};
 	
@@ -470,12 +471,15 @@
 			io-channel-names = "adc-ear","adc-gdet";
 			#io-channel-cells = <2>;
 			io-channel-ranges;
-			but-zones-list = <&but_zones 226 0 240>, /* send/end */
-					<&but_zones 582 241 317>, /* google */
-					<&but_zones 115 318 517>, /* vol up */
-					<&but_zones 114 518 1107>; /* vol down */
-			mic-adc-range = <1347>;
+			but-zones-list = <&but_zones 226 0 206>, /* send/end */
+					<&but_zones 582 207 290>, /* google */
+					<&but_zones 115 291 492>, /* vol up */
+					<&but_zones 114 493 1300>; /* vol down */
+			mic-adc-range = <1367>;
 			mic-det-delay = <550>;
+			water-threshold-max = <2250>;
+			water-threshold-min1 = <550>;
+			water-threshold-min2 = <550>;
 		};
 	};
 
@@ -489,6 +493,14 @@
 		samsung,i2c-bus-num = <20>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&spk_amp_i2c>;
+	};
+
+	/* Gtactive2lte model needs SD Card Detect Pin Setting */
+	dwmmc2@13560000 {
+		skip-init-mmc-scan;
+		card-detect = <&gpa0 1 0xf>;
+		card-detect-gpio;
+		sec-sd-slot-type = <1>; /* Normal SD slot */
 	};
 
 	wlan {
@@ -540,11 +552,11 @@
 	s1402x: s1402x@14880000 {
 		pinctrl-names = "default", "idle", "bt", "bt-idle";
 		pinctrl-0 = <&i2s_pmic_amp_bus
-			&i2s_bt_bus>;
+			&i2s_amp_bus>;
 		pinctrl-1 = <&i2s_pmic_amp_bus_idle
 			&i2s_bt_bus_idle> ;
 		pinctrl-2 = <&i2s_pmic_bus
-			&i2s_amp_bus>;
+			&i2s_bt_bus>;
 		pinctrl-3 = <&i2s_bt_bus_idle>;
 
 		/delete-property/ bck-mcko-mode;
@@ -569,14 +581,25 @@
 			samsung,pin-function = <2>;
 			samsung,pin-pud = <0>;
 		};
-
+		bt_en: bt-en {
+			samsung,pins ="gpd4-0";
+			samsung,pin-function = <1>;
+			samsung,pin-pud = <0>;
+			samsung,pin-con-pdn = <3>;
+			samsung,pin-pud-pdn = <0>;
+		};
 		acc_int: acc_int {
 			samsung,pins = "gpd4-3";
 			samsung,pin-function = <0xF>;
 			samsung,pin-pud = <0>;
 			samsung,pin-drv = <0>;
 		};
-
+		bt_btwake: bt-btwake {
+			samsung,pins = "gpd4-5";
+			samsung,pin-function = <1>;
+			samsung,pin-pud = <1>;
+			samsung,pin-pud-pdn = <0>;
+		};
 		sensor_ldo_en: sensor_ldo_en {
 			samsung,pins = "gpf4-2";
 			samsung,pin-function = <1>;
@@ -588,6 +611,12 @@
 			samsung,pins = "gpd3-3";
 			samsung,pin-function = <1>;
 			samsung,pin-pud = <0>;
+		};
+	};
+
+	i2c@13840000 {
+		touchscreen@49 {
+			stm,bringup = <2>;
 		};
 	};
 };

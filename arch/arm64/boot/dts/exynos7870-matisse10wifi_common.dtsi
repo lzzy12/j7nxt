@@ -8,8 +8,8 @@
  * published by the Free Software Foundation.
 */
 
-#include "exynos7870.dtsi"
 #include "exynos7870-rmem-2000MB.dtsi"
+#include "exynos7870.dtsi"
 
 / {
 	model = "Samsung J7XELTE board based on Exynos7870";
@@ -1371,17 +1371,21 @@
 		status = "okay";
 	};
 
-	i2c@35 {
-		compatible = "i2c-gpio";
-		gpios = <&gpc2 0 0
-			&gpc2 1 0>;
-		i2c-gpio,delay-us = <5>;
-		#address-cells = <1>;
-		#size-cells = <0>;
-		status = "okay";
+	pinctrl@139C0000 {
+		i2c2_bus: i2c2-bus {
+			samsung,pins = "gpc2-1", "gpc2-0";
+			samsung,pin-function = <2>;
+			samsung,pin-pud = <0>;
+			samsung,pin-drv = <0>;
+		};
+	};
 
-		tc358764@35 {
-			compatible = "tc358764,i2c";
+	i2c_2: i2c@13890000 {
+		status = "okay";
+		samsung,i2c-max-bus-freq = <400000>;
+
+		tc358764@0f {
+			compatible = "i2c,tc358764";
 			reg = <0x0F>;
 			pinctrl-names = "default";
 			/* [0] : panel power [1] : PWM temporarily */

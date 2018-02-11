@@ -18,6 +18,8 @@
 		PIN_IN(etc0-3, DOWN, LV1);	/* NC */
 
 		PIN_IN(gpa1-5, DOWN, LV1);	/* VTCAM_STBY */
+
+		PIN_IN(gpq0-1, DOWN, LV1);	/* NC */
 	};
 	/*
 	 * Note:
@@ -71,6 +73,14 @@
 
 /* 0x1375_0000(FSYS): gpr0~4 */
 /* pinctrl_3 */
+&pinctrl_3 {
+	pinctrl-names = "sleep";
+	pinctrl-0 = <&sleep3>;
+	sleep3: sleep-state {
+		PIN_SLP(gpr0-1, OUT1, NONE);	/* EMMC_CMD */
+	};
+};
+
 
 /* 0x1053_0000(MIF): gpm0 */
 &pinctrl_4 {
@@ -102,6 +112,10 @@
 	initial6: initial-state {
 		PIN_IN(gpc0-1, DOWN, LV1);	/* NC */
 
+		PIN_OUT(gpc5-1, LV1);		/* USB_MUX_SEL */
+		PIN_OUT_SET(gpc6-2, 1, LV1);	/* IF_PMIC_RST */
+		PIN_OUT(gpc6-3, LV1);		/* USB_ID_CTR */
+
 		PIN_IN(gpd2-4, NONE, LV1);	/* HW_REV0 */
 		PIN_IN(gpd2-5, NONE, LV1);	/* HW_REV1 */
 
@@ -128,11 +142,15 @@
 		PIN_SLP(gpc4-3, INPUT, NONE);	/* SENSOR_SCL_1P8 */
 
 		PIN_SLP(gpc5-0, INPUT, NONE);	/* BACK_KEY */
+		PIN_SLP(gpc5-1, PREV, NONE);	/* USB_MUX_SEL */
 
-		PIN_SLP(gpc6-0, OUT1, UP);	/* VDD_NFC_EN */
-		PIN_SLP(gpc6-1, PREV, NONE);	/* GPS_PWR_ON */
-		PIN_SLP(gpc6-2, INPUT, DOWN);	/* NC */
-		PIN_SLP(gpc6-3, INPUT, DOWN);	/* NC */
+		PIN_SLP(gpc6-0, PREV, NONE);	/* VDD_NFC_EN */
+		PIN_SLP(gpc6-1, OUT0, DOWN);	/* GPS_PWR_ON */
+		PIN_SLP(gpc6-2, OUT1, NONE);	/* IF_PMIC_RST */
+		PIN_SLP(gpc6-3, PREV, NONE);	/* USB_ID_CTR */
+
+		PIN_SLP(gpc8-0, INPUT, NONE);	/* CC_SCL_1P8 */
+		PIN_SLP(gpc8-1, INPUT, NONE);	/* CC_SDA_1P8 */
 
 		PIN_SLP(gpc9-0, INPUT, NONE);	/* GRIP_SDA_1P8 */
 		PIN_SLP(gpc9-1, INPUT, NONE);	/* GRIP_SCL_1P8 */
@@ -145,10 +163,10 @@
 		PIN_SLP(gpd1-5, INPUT, NONE);	/* TSP_INT */
 		PIN_SLP(gpd1-6, INPUT, DOWN);	/* NC */
 
-		PIN_SLP(gpd2-0, INPUT, UP);	/* GPS_RXD */
-		PIN_SLP(gpd2-1, OUT1, UP);	/* GPS_TXD */
-		PIN_SLP(gpd2-2, INPUT, NONE);	/* GPS_CTS */
-		PIN_SLP(gpd2-3, OUT0, DOWN);	/* GPS_RTS */
+		PIN_SLP(gpd2-0, PREV, UP);	/* GPS_RXD */
+		PIN_SLP(gpd2-1, PREV, UP);	/* GPS_TXD */
+		PIN_SLP(gpd2-2, PREV, DOWN);	/* GPS_CTS */
+		PIN_SLP(gpd2-3, PREV, DOWN);	/* GPS_RTS */
 		PIN_SLP(gpd2-4, INPUT, NONE);	/* HW_REV0 */
 		PIN_SLP(gpd2-5, INPUT, NONE);	/* HW_REV1 */
 
@@ -189,6 +207,7 @@
 		PIN_SLP(gpf3-2, INPUT, DOWN);	/* 8MCAM_LDO_EN */
 		PIN_SLP(gpf3-3, INPUT, DOWN);	/* CAM_RST */
 
+		PIN_SLP(gpf4-0, OUT0, NONE);	/* MOTOR_LDO_EN */
 		PIN_SLP(gpf4-1, INPUT, DOWN);	/* 8MCAM_CORE_EN */
 		PIN_SLP(gpf4-2, PREV, NONE);	/* SENSOR_LDO_EN */
 		PIN_SLP(gpf4-3, INPUT, DOWN);	/* VTCAM_CORE_EN */
