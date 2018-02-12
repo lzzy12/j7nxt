@@ -228,13 +228,6 @@ config SOC_EXYNOS7870
 	select SOC_SAMSUNG
 	select SAMSUNG_DMADEV
 
-config FORCE_FAST_CHARGE
-	bool "Force AC charge mode at will"
-	default y
-	help
-	  A simple sysfs interface to force adapters that
-	  are detected as USB to charge as AC.
-
 config DTB_ON7XELTE
 	bool "Builds DTB for J7 Prime"
 

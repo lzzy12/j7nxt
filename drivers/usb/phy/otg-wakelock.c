@@ -23,11 +23,6 @@
 #include <linux/spinlock.h>
 #include <linux/usb/otg.h>
 
-#ifdef CONFIG_FORCE_FAST_CHARGE
-#include <linux/fastchg.h>
-#define USB_FASTCHG_LOAD 1000 /* uA */
-#endif
-
 #define TEMPORARY_HOLD_TIME	2000
 
 static bool enabled = true;
@@ -40,15 +35,6 @@ static struct notifier_block otgwl_nb;
  */
 
 static DEFINE_SPINLOCK(otgwl_spinlock);
-
-#ifdef CONFIG_FORCE_FAST_CHARGE
-	if (force_fast_charge == 1) {
-			mA = USB_FASTCHG_LOAD;
-			pr_info("USB fast charging is ON - 1000mA.\n");
-	} else {
-		pr_info("USB fast charging is OFF.\n");
-	}
-#endif
 
 /*
  * Only one lock, but since these 3 fields are associated with each other...
