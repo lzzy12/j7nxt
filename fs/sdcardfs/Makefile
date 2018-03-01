@@ -4,4 +4,4 @@
 
 subdir-ccflags-y += -Ifs
 #obj-y += $(n)/
-obj-y += n/
+obj-y += o/
